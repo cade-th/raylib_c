@@ -8,7 +8,8 @@
 #define f32 float
 #define f64 double
 #define GET_BIT(num, n) (((num) >> (n)) & 1)
-#define TO_RADIANS(degrees) ((degrees) * 3.14159 / 180)
+#define TO_RADIANS(degrees) ((degrees) * 3.14159f / 180.0f)
+#define MIDDLE_PLAYER(var) (pos##var + (player_size / 2))
 
 const u8 mapXsize = 8;
 const u8 mapYsize = 8;	
@@ -16,8 +17,8 @@ const u8 size_tile = 64;
 
 class Player {
 public:
-	u8 posX, posY, speed_linear, player_size, speed_angular;
-	f32 angle;
+	u8 speed_linear, player_size, speed_angular;
+	f32 angle, posX, posY;
 	
 
 Player() {
@@ -31,6 +32,11 @@ Player() {
 
 void draw() {
 	DrawRectangle(posX,posY, player_size, player_size, BLUE);
+
+	// This is to draw a line to indicate the player direction
+	Vector2 start = { MIDDLE_PLAYER(X), MIDDLE_PLAYER(Y) };	
+	Vector2 end = { MIDDLE_PLAYER(X) + 30 * cos(TO_RADIANS(angle)), MIDDLE_PLAYER(Y) + 30 * sin(TO_RADIANS(angle)) };
+	DrawLineEx(start,end, 5.0, RED);
 }
 
 void move() {
@@ -44,8 +50,8 @@ void move() {
 		posX -= speed_linear * cos(TO_RADIANS(angle));
 	}
 
-	if (IsKeyDown(KEY_A)) angle += speed_angular;
-	if (IsKeyDown(KEY_D)) angle -= speed_angular;
+	if (IsKeyDown(KEY_A)) angle -= speed_angular;
+	if (IsKeyDown(KEY_D)) angle += speed_angular;
 	
 	// Don't quite understand how this works yet
 	if(angle >= 360) angle -= 360;
