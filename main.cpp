@@ -15,6 +15,18 @@ const u8 mapXsize = 8;
 const u8 mapYsize = 8;	
 const u8 size_tile = 64;
 
+u16 map[mapXsize][mapYsize] = {
+	{1,1,1,1,1,1,1,1},
+	{1,0,0,0,1,0,0,1},
+	{1,0,0,0,1,0,0,1},
+	{1,0,0,0,1,0,0,1},
+	{1,0,0,0,0,0,0,1},
+	{1,0,0,0,0,0,0,1},
+	{1,0,0,0,0,0,0,1},
+	{1,1,1,1,1,1,1,1},
+};
+
+
 class Player {
 public:
 	u8 speed_linear, player_size, speed_angular;
@@ -26,9 +38,33 @@ Player() {
 	posY = 200;
 	angle = 180.0;
 	speed_linear = 5;
-	speed_angular = 15;
+	speed_angular = 5;
 	player_size = 20;
 }
+
+void simpleRaycast() {
+    float startX = posX + player_size / 2;
+    float startY = posY + player_size / 2;
+
+    float rayX = startX;
+    float rayY = startY;
+    float rayStepSize = 5.0f;  
+
+    while (true) {
+        rayX += cos(TO_RADIANS(angle)) * rayStepSize;
+        rayY += sin(TO_RADIANS(angle)) * rayStepSize;
+
+        int mapGridX = static_cast<int>(rayX / size_tile);
+        int mapGridY = static_cast<int>(rayY / size_tile);
+
+        if (mapGridX < 0 || mapGridX >= mapXsize || mapGridY < 0 || mapGridY >= mapYsize) break;
+
+        if (map[mapGridY][mapGridX] == 1) break;
+    }
+
+    DrawLineEx({ startX, startY }, { rayX, rayY }, 2.0, BLUE);
+}
+
 
 void draw() {
 	DrawRectangle(posX,posY, player_size, player_size, BLUE);
@@ -59,18 +95,6 @@ void move() {
 }
 
 private:
-};
-
-
-u16 map[mapXsize][mapYsize] = {
-	{1,1,1,1,1,1,1,1},
-	{1,0,0,0,1,0,0,1},
-	{1,0,0,0,1,0,0,1},
-	{1,0,0,0,1,0,0,1},
-	{1,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,1},
-	{1,0,0,0,0,0,0,1},
-	{1,1,1,1,1,1,1,1},
 };
 
 void map_draw() {
@@ -104,6 +128,7 @@ int main(void)
 
 	map_draw();
 	player.draw();
+	player.simpleRaycast();
 	EndDrawing();
 	}
 
